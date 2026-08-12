@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI · แผนที่บุคลิกภาพ 16 แบบ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAF9F5;
+    --bg-alt: #F1EEE6;
+    --paper: #FFFFFE;
+    --ink: #1D1B16;
+    --ink-soft: #6B6659;
+    --line: #E0DCD0;
+
+    --nt: #6B5CA5; /* analysts - purple */
+    --nt-bg: #EFEBF5;
+    --nf: #3F8562; /* diplomats - green */
+    --nf-bg: #E9F2ED;
+    --sj: #3E6BA0; /* sentinels - blue */
+    --sj-bg: #E9EFF6;
+    --sp: #B4772E; /* explorers - amber */
+    --sp-bg: #F6EDE1;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection{ background: var(--ink); color: var(--bg); }
+
+  a{ color: inherit; }
+
+  .mono{ font-family: 'IBM Plex Mono', monospace; }
+
+  header.site{
+    padding: 64px 32px 40px;
+    max-width: 1080px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+
+  h1.title{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(36px, 6vw, 58px);
+    line-height: 1.05;
+    margin: 0 0 20px;
+    letter-spacing: -0.01em;
+  }
+
+  h1.title em{
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+
+  p.lede{
+    max-width: 560px;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 0 0 28px;
+  }
+
+  .filters{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .filter-btn{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-soft);
+    padding: 8px 14px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all .15s ease;
+    display:flex;
+    align-items:center;
+    gap:7px;
+  }
+  .filter-btn .dot{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .filter-btn:hover{ border-color: var(--ink); color: var(--ink); }
+  .filter-btn.active{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .filter-btn.active .dot{ filter: none; }
+
+  main{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px 100px;
+  }
+
+  .grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  @media (max-width: 860px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px){ .grid{ grid-template-columns: 1fr; } }
+
+  .card{
+    background: var(--paper);
+    padding: 26px 22px;
+    cursor: pointer;
+    position: relative;
+    transition: background .18s ease;
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 168px;
+  }
+  .card:hover{ background: var(--bg-alt); }
+  .card:focus-visible{ outline: 2px solid var(--ink); outline-offset: -2px; }
+
+  .card .group-tag{
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color: var(--ink-soft);
+  }
+  .card .group-tag .dot{ width:6px; height:6px; border-radius:50%; }
+
+  .card .code{
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: 0.02em;
+  }
+
+  .card .name{
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-top: -8px;
+  }
+
+  .card .tagline{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-top: auto;
+  }
+
+  /* Detail overlay */
+  .overlay{
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 50;
+    overflow-y: auto;
+    transform: translateY(16px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease;
+  }
+  .overlay.open{
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .overlay-inner{
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 32px 120px;
+  }
+
+  .close-btn{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 9px 16px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    display: inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .close-btn:hover{ border-color: var(--ink); color: var(--ink); }
+
+  .detail-head{
+    margin: 36px 0 8px;
+  }
+
+  .detail-head .group-tag{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display:flex; align-items:center; gap:8px;
+    margin-bottom: 16px;
+  }
+  .detail-head .group-tag .dot{ width:8px; height:8px; border-radius:50%; }
+
+  .detail-code{
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .detail-name{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.08;
+    margin: 0 0 14px;
+  }
+
+  .detail-tagline{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink-soft);
+    margin: 0 0 28px;
+  }
+
+  .detail-desc{
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--ink);
+    max-width: 620px;
+    margin-bottom: 40px;
+  }
+
+  /* axis gauges */
+  .axes{
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 26px 24px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    margin-bottom: 44px;
+  }
+  .axis-row{
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    gap: 14px;
+  }
+  .axis-letter{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  .axis-letter.active{ color: var(--ink); }
+  .axis-track{
+    position: relative;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+  }
+  .axis-marker{
+    position: absolute;
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--ink);
+    transform: translate(-50%, -50%);
+    transition: left .3s ease;
+  }
+  .axis-label{
+    grid-column: 1 / -1;
+    display:flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    margin-top: -6px;
+  }
+
+  section.block{ margin-bottom: 40px; }
+  .block h3{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .block h3::after{
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  ul.trait-list{
+    list-style: none;
+    margin:0; padding:0;
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  ul.trait-list li{
+    font-size: 14px;
+    padding: 8px 14px;
+    background: var(--bg-alt);
+    border-radius: 100px;
+    color: var(--ink);
+  }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  @media (max-width: 640px){ .two-col{ grid-template-columns: 1fr; } }
+
+  ul.plain-list{
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  ul.plain-list li{
+    font-size: 14.5px;
+    line-height: 1.55;
+    padding-left: 18px;
+    position: relative;
+    color: var(--ink);
+  }
+  ul.plain-list.strength li::before{
+    content: '+';
+    position: absolute;
+    left: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--nf);
+    font-weight: 600;
+  }
+  ul.plain-list.weakness li::before{
+    content: '–';
+    position: absolute;
+    left: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--sp);
+    font-weight: 600;
+  }
+
+  .compat-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 640px){ .compat-grid{ grid-template-columns: 1fr; } }
+
+  .compat-card{
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .compat-card:hover{ border-color: var(--ink); background: var(--bg-alt); }
+  .compat-card .compat-code{
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .compat-card .compat-name{
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 2px 0 8px;
+  }
+  .compat-card .compat-reason{
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  footer.site{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 30px 32px 60px;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    border-top: 1px solid var(--line);
+    line-height: 1.6;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <p class="eyebrow">16 Personality Types · แผนที่บุคลิกภาพ</p>
+  <h1 class="title">รู้จักตัวเองผ่าน<br><em>ตัวอักษรสี่ตัว</em></h1>
+  <p class="lede">สำรวจลักษณะนิสัย จุดแข็ง จุดที่ควรระวัง และคู่ที่เข้ากันได้ดี ของบุคลิกภาพทั้ง 16 แบบตามทฤษฎี MBTI — คลิกที่การ์ดเพื่อดูรายละเอียดแต่ละแบบ</p>
+  <div class="filters" id="filters"></div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer class="site">
+  เนื้อหาบนหน้านี้อ้างอิงกรอบแนวคิด MBTI ที่ใช้กันทั่วไป เขียนขึ้นใหม่เพื่อการเรียนรู้และสำรวจตัวเอง ไม่ใช่เครื่องมือวินิจฉัยทางจิตวิทยาอย่างเป็นทางการ
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-inner" id="overlayInner"></div>
+</div>
+
+<script>
+const GROUPS = {
+  NT: { label: 'นักวิเคราะห์', color: 'var(--nt)', bg: 'var(--nt-bg)' },
+  NF: { label: 'นักการทูต', color: 'var(--nf)', bg: 'var(--nf-bg)' },
+  SJ: { label: 'ผู้พิทักษ์', color: 'var(--sj)', bg: 'var(--sj-bg)' },
+  SP: { label: 'นักสำรวจ', color: 'var(--sp)', bg: 'var(--sp-bg)' },
+};
+
+const TYPES = {
+  INTJ: { group:'NT', name:'นักวางแผนเชิงกลยุทธ์', nameEn:'The Architect',
+    tagline:'จินตนาการสร้างกลยุทธ์ ความมุ่งมั่นสร้างผลลัพธ์',
+    desc:'มองโลกผ่านระบบและความเป็นไปได้ในระยะยาว วางแผนอย่างรัดกุมก่อนลงมือทำเสมอ เชื่อมั่นในตรรกะและให้คุณค่ากับความเป็นอิสระทางความคิด มักเห็นภาพรวมของปัญหาได้ก่อนคนอื่น',
+    traits:['มีวิสัยทัศน์ไกล','พึ่งพาตนเองสูง','วิเคราะห์เชิงระบบ','ตัดสินใจด้วยเหตุผล','ต้องการพื้นที่ส่วนตัว'],
+    strengths:['วางแผนกลยุทธ์และมองภาพรวมได้แม่นยำ','เรียนรู้สิ่งใหม่ได้รวดเร็ว','ทำงานอิสระได้อย่างมีประสิทธิภาพ','มุ่งมั่นกับเป้าหมายระยะยาวไม่ท้อถอย'],
+    weaknesses:['ดูเย็นชาหรือห่างเหินในสายตาคนอื่น','ไม่ถนัดแสดงออกทางอารมณ์','วิจารณ์ตัวเองและผู้อื่นตรงเกินไป','ต่อต้านกฎเกณฑ์ที่มองว่าไม่มีเหตุผล'],
+    compatible:[
+      {code:'ENFP', reason:'พลังงานและความยืดหยุ่นทางอารมณ์ของ ENFP ช่วยเติมเต็มด้านที่ INTJ มักมองข้าม'},
+      {code:'ENTP', reason:'ทั้งคู่สนุกกับการถกไอเดียเชิงลึก และท้าทายความคิดกันได้อย่างสร้างสรรค์'},
+    ]},
+  INTP: { group:'NT', name:'นักคิดเชิงตรรกะ', nameEn:'The Logician',
+    tagline:'ทุกคำถามคือปริศนาที่รอการไข',
+    desc:'หลงใหลในทฤษฎีและความรู้เพื่อความรู้เองมากกว่าประโยชน์ใช้สอย ชอบตั้งคำถามกับทุกสิ่งและมองหาความไม่สอดคล้องในระบบความคิด เป็นนักสังเกตการณ์ที่เงียบแต่ความคิดพลุ่งพล่านตลอดเวลา',
+    traits:['อยากรู้อยากเห็นสูง','คิดนอกกรอบ','เป็นกลางทางความคิด','ชอบทำงานคนเดียว','ไม่ชอบกฎเกณฑ์ตายตัว'],
+    strengths:['วิเคราะห์ปัญหาเชิงลึกได้ยอดเยี่ยม','สร้างสรรค์แนวคิดและทฤษฎีใหม่','เปิดใจรับมุมมองที่แตกต่าง','ซื่อสัตย์และตรงไปตรงมา'],
+    weaknesses:['ผัดวันประกันพรุ่งบ่อยครั้ง','ไม่ถนัดจัดการอารมณ์ตนเองและผู้อื่น','ละเลยรายละเอียดเชิงปฏิบัติ','ดูเฉื่อยชาหรือไม่สนใจผู้อื่น'],
+    compatible:[
+      {code:'ENTJ', reason:'โครงสร้างและความเด็ดขาดของ ENTJ ช่วยผลักดันไอเดียของ INTP ให้เป็นจริง'},
+      {code:'ENFJ', reason:'ความอบอุ่นและทักษะการสื่อสารของ ENFJ ช่วยดึง INTP ออกมาจากโลกความคิด'},
+    ]},
+  ENTJ: { group:'NT', name:'ผู้บัญชาการ', nameEn:'The Commander',
+    tagline:'เป้าหมายชัดเจน นำทัพด้วยความมั่นใจ',
+    desc:'เกิดมาเพื่อเป็นผู้นำ มองเห็นภาพใหญ่และจัดระบบคนกับทรัพยากรให้ขับเคลื่อนไปสู่เป้าหมายได้อย่างมีประสิทธิภาพ กล้าตัดสินใจและไม่กลัวความรับผิดชอบ',
+    traits:['มุ่งมั่น','ตัดสินใจเด็ดขาด','พูดจาตรงไปตรงมา','มีความทะเยอทะยาน','ชอบควบคุมสถานการณ์'],
+    strengths:['นำทีมได้อย่างมีประสิทธิภาพ','วางแผนระยะยาวและมองภาพรวมเก่ง','กล้าตัดสินใจภายใต้แรงกดดัน','ผลักดันให้เกิดผลลัพธ์จริง'],
+    weaknesses:['ใจร้อนกับคนที่ทำงานช้า','ไม่อดทนต่อความไม่มีประสิทธิภาพ','ดูข่มผู้อื่นโดยไม่ตั้งใจ','ละเลยความรู้สึกของทีม'],
+    compatible:[
+      {code:'INFP', reason:'มุมมองภายในและค่านิยมที่ลึกซึ้งของ INFP ช่วยถ่วงดุลความเด็ดขาดของ ENTJ'},
+      {code:'INTP', reason:'ความคิดสร้างสรรค์เชิงทฤษฎีของ INTP เติมเต็มมุมที่ ENTJ มักมองข้าม'},
+    ]},
+  ENTP: { group:'NT', name:'นักโต้วาที', nameEn:'The Debater',
+    tagline:'ทุกความคิดคือจุดเริ่มต้นของการถกเถียง',
+    desc:'ชอบท้าทายความคิดเดิมและสนุกกับการต่อยอดไอเดีย มองเห็นความเป็นไปได้รอบด้านและไม่กลัวที่จะเสนอมุมมองที่แหวกแนว',
+    traits:['ช่างพูด','มองโลกในแง่ความเป็นไปได้','ปรับตัวไว','ชอบเล่นกับความคิด','ไม่ชอบความจำเจ'],
+    strengths:['คิดไอเดียใหม่ได้อย่างรวดเร็ว','โน้มน้าวใจผู้อื่นได้เก่ง','มองเห็นโอกาสที่คนอื่นมองข้าม','ปรับตัวเข้ากับสถานการณ์ได้ดี'],
+    weaknesses:['เริ่มโปรเจกต์เยอะแต่ทำไม่จบ','ชอบเถียงเพื่อความสนุกจนคนอื่นรำคาญ','ไม่ถนัดงานที่ต้องใส่ใจรายละเอียด','ขาดความสม่ำเสมอในระยะยาว'],
+    compatible:[
+      {code:'INFJ', reason:'ความลึกซึ้งและโฟกัสของ INFJ ช่วยให้ ENTP นำไอเดียไปทำจริงได้'},
+      {code:'INTJ', reason:'ทั้งคู่ชื่นชอบการวิเคราะห์เชิงกลยุทธ์ และเคารพความเป็นเหตุเป็นผลของกันและกัน'},
+    ]},
+  INFJ: { group:'NF', name:'ผู้สนับสนุน', nameEn:'The Advocate',
+    tagline:'มองลึกถึงความหมาย ทำงานเพื่ออุดมการณ์',
+    desc:'มีอุดมคติสูงและเข้าใจความรู้สึกของผู้อื่นได้อย่างลึกซึ้ง มุ่งมั่นสร้างความเปลี่ยนแปลงที่มีความหมาย แม้ภายนอกจะดูเงียบสงบแต่ภายในเต็มไปด้วยแรงผลักดัน',
+    traits:['เข้าใจคนอื่นง่าย','มีอุดมคติสูง','รักความเป็นส่วนตัว','ใส่ใจรายละเอียดทางอารมณ์','มุ่งมั่นในคุณค่าที่เชื่อ'],
+    strengths:['สร้างแรงบันดาลใจให้ผู้อื่นได้อย่างเงียบๆ','มองเห็นภาพรวมและความหมายลึกซึ้ง','ทุ่มเทให้กับสิ่งที่เชื่ออย่างเต็มที่','เข้าใจความรู้สึกของคนรอบข้าง'],
+    weaknesses:['เก็บอารมณ์ตัวเองจนหมดไฟง่าย','คาดหวังความสมบูรณ์แบบสูงเกินไป','ไวต่อคำวิจารณ์','หลีกเลี่ยงความขัดแย้ง'],
+    compatible:[
+      {code:'ENTP', reason:'พลังงานและความสนุกสนานของ ENTP ช่วยดึง INFJ ออกจากโลกความคิดของตัวเอง'},
+      {code:'ENFP', reason:'ความอบอุ่นและความเปิดกว้างของทั้งคู่สร้างความเข้าใจกันได้ลึกซึ้ง'},
+    ]},
+  INFP: { group:'NF', name:'นักไกล่เกลี่ย', nameEn:'The Mediator',
+    tagline:'ตามหาความจริงและความหมายในทุกเรื่องราว',
+    desc:'มีโลกภายในที่ลึกซึ้งเต็มไปด้วยค่านิยมและอุดมคติ มองหาความหมายและความสอดคล้องในทุกสิ่งที่ทำ ให้ความสำคัญกับความจริงใจมากกว่าความสมบูรณ์แบบภายนอก',
+    traits:['อ่อนไหวทางอารมณ์','ซื่อสัตย์ต่อคุณค่าตัวเอง','จินตนาการสูง','เห็นอกเห็นใจผู้อื่น','ไม่ชอบความขัดแย้ง'],
+    strengths:['สร้างสรรค์งานศิลปะและงานเขียนได้ลึกซึ้ง','เข้าใจความรู้สึกของผู้อื่นได้ดี','ยืนหยัดในสิ่งที่เชื่อมั่น','ปรับตัวและเปิดกว้างต่อความคิดใหม่'],
+    weaknesses:['ตัดสินใจช้าเพราะคิดมาก','ไวต่อคำวิจารณ์อย่างมาก','หลีกเลี่ยงความขัดแย้งจนเก็บกด','ทำงานตามกำหนดเวลาได้ยาก'],
+    compatible:[
+      {code:'ENTJ', reason:'โครงสร้างและความมั่นใจของ ENTJ ช่วยให้ INFP นำอุดมคติมาปฏิบัติจริง'},
+      {code:'ENFJ', reason:'ความเข้าใจในคุณค่าและความรู้สึกทำให้ทั้งคู่เชื่อมโยงกันได้ง่าย'},
+    ]},
+  ENFJ: { group:'NF', name:'ผู้นำที่สร้างแรงบันดาลใจ', nameEn:'The Protagonist',
+    tagline:'นำผู้คนไปสู่สิ่งที่ดีกว่าด้วยหัวใจ',
+    desc:'มีเสน่ห์และเข้าใจผู้คนได้ลึกซึ้ง ใช้ความสามารถด้านมนุษยสัมพันธ์นำทีมไปสู่เป้าหมายร่วมกัน ใส่ใจการเติบโตของคนรอบข้างไม่แพ้เป้าหมายของตัวเอง',
+    traits:['เข้าอกเข้าใจสูง','พูดจาโน้มน้าวใจ','ใส่ใจการเติบโตของผู้อื่น','มีความรับผิดชอบสูง','อ่อนไหวต่อบรรยากาศรอบตัว'],
+    strengths:['สร้างแรงบันดาลใจและรวมพลังทีมได้ดี','สื่อสารได้อย่างมีเสน่ห์และน่าเชื่อถือ','เห็นศักยภาพในตัวผู้อื่น','ทุ่มเทให้เป้าหมายส่วนรวม'],
+    weaknesses:['ทุ่มเทให้คนอื่นจนละเลยตัวเอง','ไวต่อคำวิจารณ์','ตัดสินใจโดยเอาใจคนอื่นมากเกินไป','กดดันตัวเองให้สมบูรณ์แบบ'],
+    compatible:[
+      {code:'INFP', reason:'ความลึกซึ้งภายในของ INFP เติมเต็มพลังที่ ENFJ มอบให้คนรอบข้าง'},
+      {code:'ISFP', reason:'ความอ่อนโยนและความจริงใจของ ISFP เข้ากับความอบอุ่นของ ENFJ ได้ดี'},
+    ]},
+  ENFP: { group:'NF', name:'นักรณรงค์', nameEn:'The Campaigner',
+    tagline:'พลังบวกและไอเดียใหม่ไม่มีวันหมด',
+    desc:'กระตือรือร้นและเปิดกว้างต่อความเป็นไปได้ใหม่ๆ มองเห็นศักยภาพในตัวคนและโอกาสรอบตัวอยู่เสมอ ทำให้บรรยากาศรอบข้างมีชีวิตชีวา',
+    traits:['กระตือรือร้น','เข้าสังคมเก่ง','จินตนาการสูง','เปิดรับประสบการณ์ใหม่','อ่อนไหวทางอารมณ์'],
+    strengths:['สร้างแรงบันดาลใจให้คนรอบข้าง','ปรับตัวเข้ากับสถานการณ์ใหม่ได้ดี','เห็นความเป็นไปได้ที่คนอื่นมองข้าม','สื่อสารได้อย่างมีชีวิตชีวา'],
+    weaknesses:['โฟกัสกับสิ่งใดสิ่งหนึ่งได้ไม่นาน','วางแผนระยะยาวได้ยาก','ไวต่อความรู้สึกจนเครียดง่าย','เริ่มโปรเจกต์เยอะแต่ทำไม่จบ'],
+    compatible:[
+      {code:'INTJ', reason:'ความลึกซึ้งและโฟกัสของ INTJ ช่วยให้ ENFP ทำไอเดียให้สำเร็จเป็นรูปธรรม'},
+      {code:'INFJ', reason:'ทั้งคู่เชื่อมโยงกันผ่านความหมายและอุดมคติที่ลึกซึ้งคล้ายกัน'},
+    ]},
+  ISTJ: { group:'SJ', name:'ผู้ตรวจสอบ', nameEn:'The Logistician',
+    tagline:'ความรับผิดชอบคือคำมั่นสัญญาที่ทำได้จริง',
+    desc:'ยึดมั่นในระเบียบ ข้อเท็จจริง และหน้าที่ ทำงานอย่างเป็นระบบและมีความรับผิดชอบสูง เป็นคนที่ไว้ใจได้เสมอเมื่อรับปากสิ่งใดไว้',
+    traits:['มีระเบียบวินัย','ซื่อตรง','พึ่งพาได้','ใส่ใจรายละเอียด','ยึดมั่นในประเพณีและกฎเกณฑ์'],
+    strengths:['ทำงานอย่างมีระบบและแม่นยำ','รักษาคำมั่นสัญญาเสมอ','จัดการเวลาและทรัพยากรได้ดี','มีความรับผิดชอบสูง'],
+    weaknesses:['ปรับตัวกับความเปลี่ยนแปลงได้ยาก','ยึดติดกฎเกณฑ์จนขาดความยืดหยุ่น','ไม่ถนัดแสดงออกทางอารมณ์','ตัดสินคนอื่นด้วยมาตรฐานของตัวเอง'],
+    compatible:[
+      {code:'ESFP', reason:'ความสนุกสนานและความยืดหยุ่นของ ESFP ช่วยให้ ISTJ ผ่อนคลายมากขึ้น'},
+      {code:'ESTP', reason:'พลังงานที่มุ่งลงมือทำของ ESTP เติมความมีชีวิตชีวาให้กับความมั่นคงของ ISTJ'},
+    ]},
+  ISFJ: { group:'SJ', name:'ผู้พิทักษ์', nameEn:'The Defender',
+    tagline:'ดูแลคนรอบข้างอย่างเงียบๆ แต่มั่นคง',
+    desc:'ใส่ใจรายละเอียดและความรู้สึกของผู้อื่น ทุ่มเทดูแลคนใกล้ชิดด้วยความอบอุ่นและความรับผิดชอบ มักเป็นเสาหลักที่คนรอบข้างพึ่งพาได้เสมอ',
+    traits:['อบอุ่น','รอบคอบ','ซื่อสัตย์','ถ่อมตัว','ให้ความสำคัญกับความสัมพันธ์'],
+    strengths:['ใส่ใจและดูแลผู้อื่นอย่างละเอียด','ทำงานอย่างรับผิดชอบและสม่ำเสมอ','จดจำรายละเอียดเล็กๆ ของคนรอบข้าง','อดทนและมั่นคงในทุกสถานการณ์'],
+    weaknesses:['เสียสละตัวเองจนลืมดูแลตัวเอง','ไม่กล้าปฏิเสธคนอื่น','ไวต่อคำวิจารณ์','ต่อต้านความเปลี่ยนแปลง'],
+    compatible:[
+      {code:'ESFP', reason:'พลังงานร่าเริงของ ESFP ช่วยดึง ISFJ ออกจากกรอบความคุ้นเคยเดิมๆ'},
+      {code:'ESTP', reason:'ความกล้าลงมือทำของ ESTP ช่วยให้ ISFJ กล้าออกจาก comfort zone มากขึ้น'},
+    ]},
+  ESTJ: { group:'SJ', name:'ผู้บริหาร', nameEn:'The Executive',
+    tagline:'จัดระบบทุกอย่างให้เดินหน้าอย่างมีประสิทธิภาพ',
+    desc:'ชอบความชัดเจนและระเบียบ นำทีมด้วยกฎเกณฑ์และมาตรฐานที่ปฏิบัติได้จริง เป็นคนที่ลงมือทำให้แผนงานเกิดขึ้นจริงเสมอ',
+    traits:['เป็นระบบระเบียบ','ตรงไปตรงมา','มุ่งเป้าหมาย','เชื่อมั่นในตนเอง','ยึดถือธรรมเนียมปฏิบัติ'],
+    strengths:['บริหารจัดการได้อย่างมีประสิทธิภาพ','ตัดสินใจเด็ดขาด','รักษากฎและมาตรฐานอย่างเคร่งครัด','ทำงานหนักและรับผิดชอบสูง'],
+    weaknesses:['ไม่ยืดหยุ่นต่อความคิดที่แตกต่าง','ใจร้อนกับความล่าช้า','ตัดสินคนอื่นเร็วเกินไป','ละเลยความรู้สึกของทีม'],
+    compatible:[
+      {code:'ISFP', reason:'ความยืดหยุ่นและมุมมองอ่อนโยนของ ISFP ช่วยถ่วงดุลความเข้มงวดของ ESTJ'},
+      {code:'ISTP', reason:'ความใจเย็นและมุมมองเชิงปฏิบัติของ ISTP เข้ากับสไตล์ตรงไปตรงมาของ ESTJ'},
+    ]},
+  ESFJ: { group:'SJ', name:'กงสุล', nameEn:'The Consul',
+    tagline:'รักษาความสัมพันธ์และความสามัคคีในทุกกลุ่ม',
+    desc:'ใส่ใจความรู้สึกของคนรอบข้างและทุ่มเทให้กับความสัมพันธ์ในสังคม ชอบดูแลให้ทุกคนรู้สึกเป็นส่วนหนึ่งของกลุ่มเสมอ',
+    traits:['เข้าสังคมเก่ง','ใส่ใจผู้อื่น','ชอบความชัดเจน','ยึดถือธรรมเนียม','ต้องการการยอมรับจากผู้อื่น'],
+    strengths:['สร้างความสัมพันธ์ที่อบอุ่นได้ดี','จัดการงานที่เกี่ยวข้องกับคนได้เก่ง','รับผิดชอบและเชื่อถือได้','ใส่ใจรายละเอียดของคนรอบข้าง'],
+    weaknesses:['ไวต่อคำวิจารณ์และการถูกปฏิเสธ','ต้องการการยอมรับจนละเลยความต้องการตัวเอง','ไม่ถนัดรับมือความขัดแย้ง','ยึดติดกับธรรมเนียมมากเกินไป'],
+    compatible:[
+      {code:'ISFP', reason:'มุมมองอิสระของ ISFP ช่วยเปิดโลกให้ ESFJ มองเห็นมุมมองที่หลากหลายขึ้น'},
+      {code:'ISTP', reason:'ความใจเย็นและเป็นอิสระของ ISTP เติมความสมดุลให้กับความใส่ใจของ ESFJ'},
+    ]},
+  ISTP: { group:'SP', name:'นักเทคนิค', nameEn:'The Virtuoso',
+    tagline:'ลงมือทำเพื่อเข้าใจว่าสิ่งต่างๆ ทำงานอย่างไร',
+    desc:'ชอบแก้ปัญหาด้วยมือของตัวเองและเรียนรู้ผ่านการลงมือทำจริง มองโลกอย่างเป็นเหตุเป็นผลและให้ความสำคัญกับสิ่งที่ปฏิบัติได้จริง',
+    traits:['ใจเย็น','ชอบลงมือปฏิบัติ','เป็นอิสระ','สังเกตการณ์เก่ง','ไม่ชอบถูกผูกมัด'],
+    strengths:['แก้ปัญหาเฉพาะหน้าได้ดี','เข้าใจกลไกและระบบได้เร็ว','ทำงานอิสระได้อย่างมีประสิทธิภาพ','ใจเย็นในสถานการณ์กดดัน'],
+    weaknesses:['ไม่ถนัดแสดงออกทางอารมณ์','หลีกเลี่ยงพันธะผูกพันระยะยาว','ดูเฉยเมยต่อความรู้สึกของผู้อื่น','เบื่อง่ายกับงานที่ทำซ้ำๆ'],
+    compatible:[
+      {code:'ESFJ', reason:'ความอบอุ่นและความใส่ใจของ ESFJ เติมเต็มด้านความสัมพันธ์ที่ ISTP มักมองข้าม'},
+      {code:'ESTJ', reason:'โครงสร้างและทิศทางที่ชัดเจนของ ESTJ ช่วยให้ ISTP มีเป้าหมายที่ชัดขึ้น'},
+    ]},
+  ISFP: { group:'SP', name:'ศิลปิน', nameEn:'The Adventurer',
+    tagline:'ใช้ชีวิตตามจังหวะและความรู้สึกของตัวเอง',
+    desc:'มีสุนทรียะและความอ่อนไหวสูง ให้คุณค่ากับอิสระและความจริงใจในการใช้ชีวิต มักแสดงตัวตนผ่านสิ่งที่ทำมากกว่าคำพูด',
+    traits:['อ่อนโยน','รักอิสระ','มีสุนทรียะทางศิลปะ','ถ่อมตัว','ใช้ชีวิตอยู่กับปัจจุบัน'],
+    strengths:['สร้างสรรค์งานศิลปะได้อย่างจริงใจ','ปรับตัวเข้ากับสถานการณ์ได้ดี','เห็นอกเห็นใจผู้อื่นอย่างลึกซึ้ง','ใจเย็นและไม่ตัดสินคนอื่น'],
+    weaknesses:['หลีกเลี่ยงความขัดแย้งจนเก็บกด','วางแผนระยะยาวได้ยาก','ไวต่อคำวิจารณ์','ไม่ถนัดแสดงความคิดเห็นตรงๆ'],
+    compatible:[
+      {code:'ESTJ', reason:'โครงสร้างและทิศทางที่ชัดเจนของ ESTJ ช่วยให้ ISFP นำความคิดสร้างสรรค์ไปสู่เป้าหมายจริง'},
+      {code:'ENFJ', reason:'ความอบอุ่นและความเข้าใจของ ENFJ เข้ากับความจริงใจของ ISFP ได้ดี'},
+    ]},
+  ESTP: { group:'SP', name:'นักผจญภัยเชิงปฏิบัติ', nameEn:'The Entrepreneur',
+    tagline:'ลงมือทำทันที เรียนรู้ระหว่างทาง',
+    desc:'กระตือรือร้นและกล้าเสี่ยง ชอบแก้ปัญหาเฉพาะหน้าและมีชีวิตชีวาอยู่กับความเป็นจริงตรงหน้ามากกว่าทฤษฎี',
+    traits:['กล้าเสี่ยง','มีพลังงานสูง','ปฏิบัตินิยม','เข้าสังคมเก่ง','ตัดสินใจไว'],
+    strengths:['แก้ปัญหาเฉพาะหน้าได้อย่างรวดเร็ว','ปรับตัวเข้ากับสถานการณ์ใหม่ได้ดี','มีเสน่ห์และเข้าสังคมเก่ง','กล้าตัดสินใจภายใต้แรงกดดัน'],
+    weaknesses:['ใจร้อนและหุนหันพลันแล่น','วางแผนระยะยาวได้ไม่ดี','เบื่อง่ายกับกฎเกณฑ์','มองข้ามความรู้สึกของผู้อื่น'],
+    compatible:[
+      {code:'ISFJ', reason:'ความรอบคอบและความมั่นคงของ ISFJ ช่วยถ่วงดุลความหุนหันของ ESTP'},
+      {code:'ISTJ', reason:'ความมีระเบียบของ ISTJ เติมเต็มด้านที่ ESTP มักมองข้ามไป'},
+    ]},
+  ESFP: { group:'SP', name:'นักแสดง', nameEn:'The Entertainer',
+    tagline:'สร้างความสนุกและพลังบวกให้ทุกช่วงเวลา',
+    desc:'มีชีวิตชีวาและรักการเป็นจุดสนใจ ใช้ชีวิตอยู่กับปัจจุบันและแบ่งปันความสุขให้คนรอบข้างอย่างเป็นธรรมชาติ',
+    traits:['ร่าเริง','เข้าสังคมเก่ง','ใช้ชีวิตอยู่กับปัจจุบัน','เห็นอกเห็นใจผู้อื่น','รักความสนุกสนาน'],
+    strengths:['สร้างบรรยากาศที่สนุกสนานให้กลุ่ม','ปรับตัวเข้ากับสถานการณ์ได้ดี','เข้าใจความรู้สึกของคนรอบข้าง','กล้าแสดงออกอย่างมั่นใจ'],
+    weaknesses:['วางแผนระยะยาวได้ยาก','ไวต่อคำวิจารณ์','หลีกเลี่ยงความขัดแย้งและปัญหาที่จริงจัง','โฟกัสกับงานรายละเอียดได้ไม่นาน'],
+    compatible:[
+      {code:'ISTJ', reason:'ความมั่นคงและความรอบคอบของ ISTJ ช่วยให้ ESFP มีรากฐานที่มั่นคงขึ้น'},
+      {code:'ISFJ', reason:'ความใส่ใจและความอบอุ่นของ ISFJ เข้ากับความร่าเริงของ ESFP ได้ดี'},
+    ]},
+};
+
+const AXES = [
+  { left:'E', right:'I', leftLabel:'มุ่งออกสู่ภายนอก', rightLabel:'มุ่งเข้าสู่ภายใน' },
+  { left:'S', right:'N', leftLabel:'ยึดข้อเท็จจริง', rightLabel:'มองภาพรวม/ความเป็นไปได้' },
+  { left:'T', right:'F', leftLabel:'ตัดสินด้วยเหตุผล', rightLabel:'ตัดสินด้วยความรู้สึก' },
+  { left:'J', right:'P', leftLabel:'มีแผนชัดเจน', rightLabel:'ยืดหยุ่นเปิดกว้าง' },
+];
+
+let activeFilter = 'ALL';
+
+function buildFilters(){
+  const el = document.getElementById('filters');
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn active';
+  allBtn.dataset.group = 'ALL';
+  allBtn.innerHTML = `<span class="dot" style="background:var(--ink)"></span>ทั้งหมด`;
+  allBtn.onclick = () => setFilter('ALL');
+  el.appendChild(allBtn);
+
+  Object.entries(GROUPS).forEach(([key, g]) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.group = key;
+    btn.innerHTML = `<span class="dot" style="background:${g.color}"></span>${g.label}`;
+    btn.onclick = () => setFilter(key);
+    el.appendChild(btn);
+  });
+}
+
+function setFilter(key){
+  activeFilter = key;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.group === key);
+  });
+  renderGrid();
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  Object.entries(TYPES).forEach(([code, t]) => {
+    if(activeFilter !== 'ALL' && t.group !== activeFilter) return;
+    const g = GROUPS[t.group];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.tabIndex = 0;
+    card.setAttribute('role','button');
+    card.innerHTML = `
+      <div class="group-tag"><span class="dot" style="background:${g.color}"></span>${g.label}</div>
+      <div>
+        <div class="code" style="color:${g.color}">${code}</div>
+        <div class="name">${t.name}</div>
+      </div>
+      <div class="tagline">${t.tagline}</div>
+    `;
+    card.onclick = () => openDetail(code);
+    card.onkeydown = (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openDetail(code); } };
+    grid.appendChild(card);
+  });
+}
+
+function axisMarkerPos(letter, axis){
+  return letter === axis.left ? '14%' : '86%';
+}
+
+function renderAxes(code){
+  return AXES.map(axis => {
+    const activeLetter = code.includes(axis.left) ? axis.left : axis.right;
+    const pos = axisMarkerPos(activeLetter, axis);
+    return `
+      <div class="axis-row">
+        <div class="axis-letter ${activeLetter===axis.left?'active':''}">${axis.left}</div>
+        <div class="axis-track"><div class="axis-marker" style="left:${pos}"></div></div>
+        <div class="axis-letter ${activeLetter===axis.right?'active':''}">${axis.right}</div>
+      </div>
+      <div class="axis-label"><span>${axis.leftLabel}</span><span>${axis.rightLabel}</span></div>
+    `;
+  }).join('');
+}
+
+function openDetail(code){
+  const t = TYPES[code];
+  const g = GROUPS[t.group];
+  const inner = document.getElementById('overlayInner');
+
+  inner.innerHTML = `
+    <button class="close-btn" id="closeBtn">← กลับไปหน้ารวม</button>
+
+    <div class="detail-head">
+      <div class="group-tag" style="color:${g.color}"><span class="dot" style="background:${g.color}"></span>${g.label}</div>
+      <div class="detail-code">${code} · ${t.nameEn}</div>
+      <h2 class="detail-name">${t.name}</h2>
+      <p class="detail-tagline">"${t.tagline}"</p>
+    </div>
+
+    <p class="detail-desc">${t.desc}</p>
+
+    <div class="axes">${renderAxes(code)}</div>
+
+    <section class="block">
+      <h3>ลักษณะนิสัยเด่น</h3>
+      <ul class="trait-list">${t.traits.map(x => `<li>${x}</li>`).join('')}</ul>
+    </section>
+
+    <section class="block">
+      <div class="two-col">
+        <div>
+          <h3>จุดแข็ง</h3>
+          <ul class="plain-list strength">${t.strengths.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <h3>จุดที่ควรระวัง</h3>
+          <ul class="plain-list weakness">${t.weaknesses.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h3>เข้ากันได้ดีกับ</h3>
+      <div class="compat-grid">
+        ${t.compatible.map(c => {
+          const ct = TYPES[c.code];
+          const cg = GROUPS[ct.group];
+          return `
+            <div class="compat-card" data-code="${c.code}">
+              <div class="compat-code" style="color:${cg.color}">${c.code}</div>
+              <div class="compat-name">${ct.name}</div>
+              <div class="compat-reason">${c.reason}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    </section>
+  `;
+
+  inner.querySelectorAll('.compat-card').forEach(el => {
+    el.onclick = () => openDetail(el.dataset.code);
+  });
+  inner.querySelector('#closeBtn').onclick = closeDetail;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('overlay').scrollTop = 0;
+  window.location.hash = code;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  history.pushState('', document.title, window.location.pathname + window.location.search);
+}
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeDetail();
+});
+
+buildFilters();
+renderGrid();
+
+// deep-link support: open a type directly via #CODE
+const initial = window.location.hash.replace('#','').toUpperCase();
+if(TYPES[initial]) openDetail(initial);
+</script>
+
+</body>
+</html>
